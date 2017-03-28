@@ -1,16 +1,18 @@
 package Service;
 
+import Model.NoteBookModel;
+import Model.NoteModel;
 import com.evernote.auth.EvernoteAuth;
 import com.evernote.auth.EvernoteService;
 import com.evernote.clients.ClientFactory;
 import com.evernote.clients.NoteStoreClient;
-import com.evernote.edam.error.EDAMNotFoundException;
-import com.evernote.edam.error.EDAMSystemException;
-import com.evernote.edam.error.EDAMUserException;
+import com.evernote.edam.notestore.NoteFilter;
+import com.evernote.edam.notestore.NoteList;
 import com.evernote.edam.type.Note;
+import com.evernote.edam.type.NoteSortOrder;
 import com.evernote.edam.type.Notebook;
-import com.evernote.thrift.TException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,16 +37,36 @@ public class EvernoteHelper {
     }
 
     public String GetNoteContent(String guid) throws Exception {
-        Note note = noteStore.getNote(guid, true, false, false, false);
-        if (note != null) {
-            return note.getContent();
-        } else {
+        try {
+            Note note = noteStore.getNote(guid, true, false, false, false);
+            String content = note.getContent();
+            int start = content.indexOf("<en-note>");
+            int end = content.indexOf("</en-note>");
+            String result = content.substring(start + 9, end);
+            return result;
+        } catch (Exception e) {
             return null;
         }
     }
 
-    public String GetNoteList() throws Exception {
+    public List<NoteBookModel> GetNoteList() throws Exception {
         List<Notebook> notebooks = noteStore.listNotebooks();
-        return null;
+        List<NoteBookModel> result = new ArrayList<>();
+        for (Notebook notebook : notebooks) {
+            NoteFilter filter = new NoteFilter();
+            filter.setNotebookGuid(notebook.getGuid());
+            filter.setOrder(NoteSortOrder.CREATED.getValue());
+            filter.setAscending(true);
+            NoteList noteList = noteStore.findNotes(filter, 0, 100);
+            List<Note> notes = noteList.getNotes();
+
+            List<NoteModel> notelist = new ArrayList<>();
+            for (Note note : notes) {
+                System.out.println(note.getTitle());
+                notelist.add(new NoteModel(note.getGuid(), note.getTitle()));
+            }
+            result.add(new NoteBookModel(notebook.getName(), notelist));
+        }
+        return result;
     }
 }

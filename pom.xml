@@ -49,6 +49,13 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.syncthemall/enml4j -->
+		<!--<dependency>-->
+			<!--<groupId>com.syncthemall</groupId>-->
+			<!--<artifactId>enml4j</artifactId>-->
+			<!--<version>1.1.0</version>-->
+		<!--</dependency>-->
+
 	</dependencies>
 
 	<build>
